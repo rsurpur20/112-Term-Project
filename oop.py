@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+#resources used:
+# https://pysource.com/2018/12/29/real-time-shape-detection-opencv-with-python-3/
+
 #goals for the night: find the center of the pupils
 def nothing(x):
     pass
@@ -16,6 +19,11 @@ class Pupil(object):
         self.hsv=cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
         self.mask= cv2.inRange(self.hsv,self.lower,self.upper)
         self.contours, self.a = cv2.findContours(self.mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        self.area=0
+        # print(cv2.findContours(self.mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE))
+        # self.detect=False
+        # if len(self.contours)!=0: self.detect=True
+        
         # cv2.imshow(f"{self.name}",frame)
 
     def finetune(self):
@@ -37,6 +45,7 @@ class Pupil(object):
         i=0
         for cnt in self.contours:
             area = cv2.contourArea(cnt) #gets the area of each contour
+            self.area=area
             #detecting shapes: (we use true to show that we are working with closed polygons) video had true true
             approx= cv2.approxPolyDP(cnt,ratio*cv2.arcLength(cnt, False),False)
             x=approx.ravel()[0]
@@ -44,23 +53,22 @@ class Pupil(object):
             #only draw area if pixels is greater than this num. this gets rid of noise
             if 2000>area> areaMin:
             # frame, contour, ?, color, thickness
-                
                 if 3 <len(approx)<10:
                     # location, font, thickness?, color
                     cv2.drawContours(self.frame, [approx], 0 ,(0,0,255), thickness)
-                    # cv2.putText(leftFrame,f"{area}", (x,y),font,1,(0,0,0))
-                #blink detection
-                # if areaLeft<.3*lastArea:
-                #     print(f"{i} Left Blink!")
-                # cv2.putText(self.frame,f"{area}", (x,y),font,1,(0,0,0))
-    
-                # lastAreaLeft=areaLeft
-            #len(approx) <-- gives you the number of sides of the detected object
+                    # cv2.putText(self.frame,f"{area}", (x,y),font,1,(0,0,0))
+            # print(area)
+                    # check if blink:
+        #             if 1000>lastArea>areaMin and area<10:
+        # #     i+=1
+        #                 print(f"Left Blink")
+        #     lastArea=area
 
 class Eye(Pupil):
     def loopContours(self):
+        # print(self.contours)
         ratio=0.04
-        areaMin=100
+        areaMin=200
         pupilAreaMin=400
         font= cv2.FONT_HERSHEY_COMPLEX_SMALL
         lastArea=0
@@ -69,6 +77,8 @@ class Eye(Pupil):
         i=0
         for cnt in self.contours:
             area = cv2.contourArea(cnt) #gets the area of each contour
+            self.area=area
+            
             #ratio
             # ratio=0.02
             #detecting shapes: (we use true to show that we are working with closed polygons) video had true true
@@ -82,18 +92,39 @@ class Eye(Pupil):
                 cv2.drawContours(self.frame, [approx], 0 ,(0,0,0), thickness)
                 # if 3 <len(approx)<10:
                     # location, font, thickness?, color
-                # cv2.putText(self.frame,f"{area}", (x,y),font,1,(0,0,0))
+                cv2.putText(self.frame,f"{area}", (x,y),font,1,(0,0,0))
             #len(approx) <-- gives you the number of sides of the detected object
+            # if 1000>lastArea>areaMin and area<10:
+            #     i+=1
+            #     print(f"{i}Left Blink")
+            # lastArea=area
+            # print(area)
+                # if self.contours==[]: print("true")
+                # else: print("false")
+            
+
+cv2.namedWindow("Trackbars")
+cv2.createTrackbar("LH", "Trackbars", 0,180, nothing)
+cv2.createTrackbar("LS", "Trackbars", 0,255, nothing)
+cv2.createTrackbar("LV", "Trackbars", 0,255, nothing)
 
 
-lowerPupil=np.array((0,0,74))
-higherPupil=np.array([180,255,255])
-lowerEye=np.array([2,79,48])
-higherEye=np.array([180,255,255])
-
+lastAreaLeft=0
+lastAreaRight=0
+lastContourList=[0]
 while True:
     _, frame= cap.read()
     
+    LH=cv2.getTrackbarPos("LH","Trackbars")
+    LS=cv2.getTrackbarPos("LS","Trackbars")
+    LV=cv2.getTrackbarPos("LV","Trackbars")
+    lowerPupil=np.array((0,0,74))
+    higherPupil=np.array([180,255,255])
+    # [4,87,82]
+    #[0,89,62]
+    lowerEye=np.array([LH,LS,LV])
+    higherEye=np.array([180,255,255])
+
     leftFrame=frame[250:310,450:600]
     rightFrame=frame[250:310,600:750]
     eyeFrame = frame[250:310,450:750]
@@ -120,12 +151,22 @@ while True:
     rightPupil.loopContours()
     leftEye.loopContours()
     rightEye.loopContours()
+    
+    areaMin=200
+    # print(lastAreaLeft,leftEye.area)
+    # print(leftEye.detect)
+    if 2000>lastAreaLeft> areaMin and leftEye.area<.6*lastAreaLeft:
+        print("LeftBlink")
+    
 
     cv2.imshow("Frame",frame)
     cv2.imshow("Resize",resize)
     cv2.imshow("left",leftFrame)
     cv2.imshow("right",rightFrame)
 
+    lastAreaLeft=leftEye.area
+    # lastContourList=leftEye.contours
+    # lastAreaRight=rightPupil.area
 
     key=cv2.waitKey(1)
     #if it is too less, video will be very fast and if it is too high, 
