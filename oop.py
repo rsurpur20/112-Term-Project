@@ -4,6 +4,11 @@ import numpy as np
 #resources used:
 # https://pysource.com/2018/12/29/real-time-shape-detection-opencv-with-python-3/
 
+
+#by mvp: direction oriented, right blink, finetuning (calibration that is user friendly)
+#re-do storyboard (by tp2)
+#tp2 is next monday- implement direction based eye tracking, right eye blinking, finetuning the contours,
+#calibration, 
 #goals for the night: find the center of the pupils
 def nothing(x):
     pass
@@ -118,10 +123,11 @@ while True:
     LH=cv2.getTrackbarPos("LH","Trackbars")
     LS=cv2.getTrackbarPos("LS","Trackbars")
     LV=cv2.getTrackbarPos("LV","Trackbars")
-    lowerPupil=np.array((0,0,74))
+    lowerPupil=np.array((0,0,93))
     higherPupil=np.array([180,255,255])
     # [4,87,82]
     #[0,89,62]
+    #[0,88,103]
     lowerEye=np.array([LH,LS,LV])
     higherEye=np.array([180,255,255])
 
@@ -155,7 +161,7 @@ while True:
     areaMin=200
     # print(lastAreaLeft,leftEye.area)
     # print(leftEye.detect)
-    if 2000>lastAreaLeft> areaMin and leftEye.area<.6*lastAreaLeft:
+    if 2000>lastAreaLeft> areaMin and leftEye.area<.5*lastAreaLeft:
         print("LeftBlink")
     
 
