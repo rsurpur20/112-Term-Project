@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-
+import pyautogui 
+import time
 #resources used:
 # https://pysource.com/2018/12/29/real-time-shape-detection-opencv-with-python-3/
 
@@ -128,6 +129,9 @@ cv2.createTrackbar("LV", "Trackbars for Pupil", 0,255, nothing)
 lastAreaLeft=0
 lastAreaRight=0
 lastContourList=[0]
+currX=400
+currY=500
+x=True
 while True:
     _, frame= cap.read()
     
@@ -174,22 +178,17 @@ while True:
     leftEye.loopContours()
     rightEye.loopContours()
     
-    areaMin=200
-    # print(lastAreaLeft,leftEye.area)
-    # print(leftEye.detect)
-    if 2000>lastAreaLeft> areaMin and leftEye.area<.5*lastAreaLeft:
-        print("LeftBlink")
-    if leftEye.cy-leftPupil.cy<0:
-        print("looking right")
-    else:
-        print("looking left")
+
 
     cv2.imshow("Frame",frame)
     cv2.imshow("Resize",resize)
-    # cv2.imshow("Resize1",resize1)
+    cv2.imshow("Resize1",resize1)
     cv2.imshow("left",leftFrame)
     cv2.imshow("right",rightFrame)
     # cv2.imshow("left", leftPupil.dot) 
+    if x:
+        time.sleep(5)
+        x=False
 
     lastAreaLeft=leftEye.area
     # lastContourList=leftEye.contours
@@ -197,7 +196,20 @@ while True:
 
     # if abs(leftEye.cx-leftPupil.cx)<leftEye.area*.1:
     #     print("center")
-
+    areaMin=200
+    # print(lastAreaLeft,leftEye.area)
+    # print(leftEye.detect)
+    if 2000>lastAreaLeft> areaMin and leftEye.area<.5*lastAreaLeft:
+        print("LeftBlink")
+    # print(leftEye.cy-leftPupil.cy)
+    if leftEye.cy-leftPupil.cy<0:
+        # print("looking left")
+        currX-=5
+        # pyautogui.moveTo(currX+5, currY) 
+    else:
+        # print("looking right")
+        currX+=5
+    pyautogui.moveTo(currX, currY) 
     key=cv2.waitKey(1)
     #if it is too less, video will be very fast and if it is too high, 
     # video will be slow (Well, that is how you can display videos in slow motion).
