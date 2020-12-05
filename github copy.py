@@ -50,7 +50,7 @@ class Pupil(object):
         # print(len(self.contours))
         for cnt in self.contours:
             area = cv2.contourArea(cnt) #gets the area of each contour
-            self.area=area
+            
             #detecting shapes: (we use true to show that we are working with closed polygons) video had true true
             approx= cv2.approxPolyDP(cnt,ratio*cv2.arcLength(cnt, False),False)
             x=approx.ravel()[0]
@@ -59,6 +59,7 @@ class Pupil(object):
             if 2000>area> areaMin:
             # frame, contour, ?, color, thickness
                 if 3 <len(approx)<10:
+                    self.area=area
                     # location, font, thickness?, color
                     cv2.drawContours(self.frame, [approx], 0 ,(0,0,255), thickness)
                     # cv2.putText(self.frame,f"{area}", (x,y),font,1,(0,0,0))
@@ -78,7 +79,6 @@ class Eye(Pupil):
     def loopContours(self):
         ratio=0.04
         areaMin=200
-        pupilAreaMin=400
         font= cv2.FONT_HERSHEY_COMPLEX_SMALL
         lastArea=0
         lastLeftPupilArea=0
@@ -89,13 +89,14 @@ class Eye(Pupil):
         # cnt=self.contours[0]
         for cnt in self.contours:
             area = cv2.contourArea(cnt) #gets the area of each contour
-            self.area=area    
+                
             #detecting shapes: (we use true to show that we are working with closed polygons) video had true true
             approx= cv2.approxPolyDP(cnt,ratio*cv2.arcLength(cnt, False),False)
             x=approx.ravel()[0]
             y=approx.ravel()[1]
             #only draw area if pixels is greater than this num. this gets rid of noise
             if 2000>area> areaMin:
+                self.area=area
             # frame, contour, ?, color, thickness
                 cv2.drawContours(self.frame, [approx], 0 ,(0,0,0), thickness)
                 #finding the center:
@@ -151,6 +152,8 @@ lastLeftArea=0
 lastRightArea=0
 originalLeftArea=0
 originalrightArea=0
+leftBlink=False
+rightBlink=False
 while True:
     _, frame= cap.read()
     
@@ -257,16 +260,27 @@ while True:
     lastRightArea=rightPupil.area
     
     if originalrightArea>0:
-        print(dleftArea,drightArea)
+        # time.sleep(.5)
+        # print(leftPupil.area,rightPupil.area)
         # time.sleep(1)
         # if dleftArea<0 and drightArea>0:
         #     print("left blink")
         # if dleftArea>0 and drightArea<0:
         #     print("right blink")
-        if dleftArea==0 :
-            print("left blink")
-        if drightArea==0:
-            print("right blink")
+        if leftPupil.area<=0 and rightPupil.area>0:
+            if not leftBlink:
+                startLeft=time.time()
+                leftBlink= not leftBlink
+            if time.time()-startLeft>1:
+                print("right blink")
+                leftBlink=False
+        if rightPupil.area<=0 and leftPupil.area>0:
+            if not rightBlink:
+                startRight=time.time()
+                rightBlink= not rightBlink
+            if time.time()-startRight>1:
+                print("left blink")
+                rightBlink=False
     #if it is too less, video will be very fast and if it is too high, 
     # video will be slow (Well, that is how you can display videos in slow motion).
     #  25 milliseconds will be OK in normal cases.
@@ -282,6 +296,7 @@ while True:
         # print(originalLeftArea,originalrightArea)
         originalLeftArea=leftPupil.area
         originalrightArea=rightPupil.area
+        print("original:")
         print(originalLeftArea,originalrightArea)
 
 
