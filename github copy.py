@@ -240,19 +240,19 @@ while True:
         dLeft=dist(leftPupil.cx,leftPupil.cy,leftEye.cx,leftEye.cy)
         dRight=dist(rightPupil.cx,rightPupil.cy,rightEye.cx,rightEye.cy)
  
-        # if leftEye.cx-leftPupil.cx<0:
-        # # print("looking left")
-        #     currX-=delta
-        # else:
-        #     # print("looking right")
-        #     currX+=delta
-        # if leftEye.cy-leftPupil.cy<0:
-        # # print("looking left")
-        #     currY-=delta
-        # else:
-        #     # print("looking right")
-        #     currY+=delta
-        # pyautogui.moveTo(currX, currY) 
+        if leftEye.cx-leftPupil.cx<0 and rightEye.cx-rightPupil.cx<0:
+        # print("looking left")
+            currX-=delta
+        elif leftEye.cx-leftPupil.cx>0 and rightEye.cx-rightPupil.cx>0:
+            # print("looking right")
+            currX+=delta
+        elif leftEye.cy-leftPupil.cy<0 and rightEye.cy-rightPupil.cy<0:
+        # print("looking left")
+            currY-=delta
+        elif leftEye.cy-leftPupil.cy>0 and rightEye.cy-rightPupil.cy>0:
+            # print("looking right")
+            currY+=delta
+        pyautogui.moveTo(currX, currY) 
     key=cv2.waitKey(1)
     dleftArea=leftPupil.area-lastLeftArea
     drightArea=rightPupil.area-lastRightArea
@@ -267,20 +267,37 @@ while True:
         #     print("left blink")
         # if dleftArea>0 and drightArea<0:
         #     print("right blink")
+        # justLeftBlink= False
         if leftPupil.area<=0 and rightPupil.area>0:
             if not leftBlink:
                 startLeft=time.time()
                 leftBlink= not leftBlink
-            if time.time()-startLeft>1:
+                # justLeftBlink=True
+        # else: endLeft=time.time()
+        # if justLeftBlink:
+            if .5<endLeft-startLeft<2:
                 print("right blink")
+                pyautogui.rightClick(x=currX, y=currY)
                 leftBlink=False
+                # startLeft=0
+
+            if endLeft-startLeft>2:
+                print("Right SCROLL")
+            # justLeftBlink=False
         if rightPupil.area<=0 and leftPupil.area>0:
+
             if not rightBlink:
                 startRight=time.time()
                 rightBlink= not rightBlink
-            if time.time()-startRight>1:
+
+            if .5<time.time()-startRight<2:
                 print("left blink")
+                pyautogui.leftClick(x=currX, y=currY)
                 rightBlink=False
+                # startRight=0
+
+            if time.time()-startRight>2:
+                print("lEFT SCROLL")
     #if it is too less, video will be very fast and if it is too high, 
     # video will be slow (Well, that is how you can display videos in slow motion).
     #  25 milliseconds will be OK in normal cases.
