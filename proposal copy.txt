@@ -1,0 +1,75 @@
+Roshni Surpur
+rsurpur
+Project Proposal
+November 30, 2020
+
+1. Project Description [2.5 pts]: The name of the term project and a short description of what it will be.
+Mouseless: A program to control your computer with your eyes. You can left click with a left blink and right
+click with a right blink. You can also move your eyes to scroll.
+
+2. Competitive Analysis [2.5 pts]: A 1-2 paragraph analysis of similar projects you've seen online, and how your project will be similar or different to those.
+My project is inspired by Winking Mouse, a S20 project coded by Jaime Romero. My project will be similar because:
+    a. I am also using OpenCV and Pyautogui
+    b. I am detecting eye blinks and correlating them with mouse clicks
+    c. I will also need to be calibrated for every user
+
+My project will be different in these ways:
+    a. I am not planning to use D-Lib which was Jaime's way of recognizing points on the users face
+    b. I want to involve more functionality in addition to clicking which would be through scrolling
+    c. the macro-level algorithm is different. I plan to find the center of the pupil in relation to your eye and correlate that to a position on your screen. Jaime mentioned that this was going to be difficult because it can get complicated with pixels. His algorithm was if you look left, move the mouse leftward. The difference is that his was direction oriented and I'm planning to make mine position oriented. This might provide problems in the future because your eye won't move if you look up 10 pixels, so I'm going to try some workarounds before switcing to a direction oriented way.
+
+3. Structural Plan [2.5 pts]: A structural plan for how the finalized project will be organized in different functions, files and/or objects.
+Here are some of my ideas for structure:
+    a. Have everything in one file, a pupil class which will have two instances (left pupil, right pupil), a eye class which will have two instances (left eye, right eye), separate calibration functions. The main chunk of code (the code making the instances, getting camera feed, creating contours on the eyes, and moving the mouse) is all going to be under one "while true" statement. This has to be under a "while true" statement because camera feed has to be constant. 
+    b. Have two separate files: 1. all the calibrations functions and the necessary user input which will only happen once (since you only callibrate once) 2. the classes, instances, and while true loop mentioned above. 
+The difference between a and b is that in a). everything is in one file b). is separated by what will be constant (i.e. constant video feed) and what will only need to be done once (calibration).
+
+4. Algorithmic Plan [2.5 pts]: A detailed algorithmic plan for how you will approach the trickiest part of the project. Be sure to clearly highlight which part(s) of your project are algorithmically most complex, and include details of the algorithm(s) you are using in those cases.
+
+Mouse clicks: Right now I am able to detect the pupil and eyeshape. I plan to find the center x and center y of the pupil and find the relation from the center to the rest of the eye to detect whether the user is looking left or right. For example, if the user's pupil is in the top left corner of the eye, then the mouse should move to the top left of the screen. 
+
+Detecting blinks: Left blinks are detected if the area of the left eye decreases by a certain porprotion if the eye was not closed. For example, when you blink, the computer will recognize that they were is no area, no eye. So the logical thing would be: if the area of the left eye is 0 while the right eye is open, then there was a left blink. But to accomadate for different eye sizes and eyelash sizes, I am going to say:
+if the left eye area decreases by 80% (for example) and the right eye remains unchanged in volume, then the user left blinked. 
+
+Scrolling: I'm not sure what the best eye movement would be to represent scrolling (i.e. holding a left blink for a certain amount of time could correlate to a scroll down and holding a right blink for an extended amount of time could be scroll up). The algorithm behind scrolling would be dependent on what eye movement I decide on. One definite aspect is that time would be involved to determine how much scrolling should happen. For example, every second you hold your eye blink would scroll down 30 pixels. 
+
+5. Timeline Plan [2.5 pts]: A timeline for when you intend to complete the major features of the project.
+By TP1: eye detection, pupil detection, 
+By TP2: figure out calibration, detecting blinking and connecting opencv and pyautogui to get mouse clicks and scrolling
+By TP3: final trouble shooting and finalize calibration and the math behind the porprotional of pupil to eye and mouse on screen
+
+6. Version Control Plan [1.5 pts]: A short description and image demonstrating how you are using version control to back up your code. Notes: You must back up your code somehow!!! Your backups must not be on your computer (ideally, store them in the cloud)
+I use github and there is an image of my repositiory in the zip file. My version control will be organized by time (because github can detect when you upload files) and I plan to push to github after I finish a working session or at the end of everyday. 
+
+7. Module List [1 pts]: A list of all external modules/hardware/technologies you are planning to use in your project. Note that any such modules must be approved by a tech demo. If you are not planning to use any additional modules, that's okay, just say so!
+a. Pyautogui
+b. OpenCV
+c. Numpy
+(maybe in the future cmu_112_graphics)
+
+TP2 UPDATES:
+- Now the mouse moving is direction oriented (so if you look left, mouse moves left)
+-scrolling is if you are winking for more than 3 seconds
+-winks are between .5 and 3 seconds
+-I am using cmu_112_graphics to have an instructions section in the top left corner of the screen
+
+key 1: toggle between calibrating and recalibrating 
+key 2/"m": toggle between the mouse moving feature
+key 3/"k": toggle between the clicking and scrolling feature
+
+-right now the code works that you can toggle the mouse moving feature with key 5 and the clicking and scrolling feature with the key k,
+which can easily be changed in the future once I decide which keys I want to act as controlling keys
+
+Overall, when you are moving the mouse and clicking, the eye frame will always be visible so users can see if they are in frame 
+and to make sure their eyes are being detected. 
+
+Sources Used:
+PYAutoGUI Documentation
+OpenCV Documentation
+https://www.pyimagesearch.com/2016/02/01/opencv-center-of-contour/
+https://pysource.com/2018/12/29/real-time-shape-detection-opencv-with-python-3/
+
+TP3 UPDATES:
+Now I have two different versions on my project. The fourdirections.py shows functionality and the main.py shows that functionaly in a different light.
+The main.py works like this: There are three modes: clicking and scrolling, left and right, up and down. So now there are two mouse moving modes and you can toggle between the two by conveniently closing your eyes for two seconds. So if I wanted to move to the upper left corner of my screen from the center of my screen: I can turn on left and right mode, look left, close my eyes for two seconds which turns off left and right mode and turns on up and down mode, then look up, and I would be in the top left corner of my screen. 
+As for UI Improvements, I enhanced the section that says what modes you have on to be color coordinated. I also have a table on the bottom to show what eye movements mean what to make it easier for users. So now all the instructions and necessary information is in a toolbar on the left. I put away all the calibration windows when you aren't using them and you can easily toggle between them if you want to change your calibration. I also created a way to get out of the program if need be which is just closing your eyes for 7-10 seconds.

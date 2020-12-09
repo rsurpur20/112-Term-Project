@@ -217,7 +217,6 @@ def timerFired(app):
         cv2.imshow("Calibrating your Eyes",resize)
         cv2.imshow("Calibrating your Pupils",resizePupils)
  
-
     mouseMoving(app)
     clickandScroll(app)
     checkdisengage(app)
@@ -228,16 +227,18 @@ def checkdisengage(app):
     if not app.currentlyCalibrating:
 
         if app.leftPupil.area<=0 and app.rightPupil.area<=0: #both eyes are closed
-
+            app.delta=0
             if not app.eyesClosed:
                 app.startDisengage=time.time()
                 app.eyesClosed=not app.eyesClosed
+        else:app.delta=5
         # print(app.eyesClosed,time.time()-app.startDisengage)
         if app.eyesClosed and 2<time.time()-app.startDisengage<4: #if both eyes closed for 2-4 seconds, then toggle mouse moving features
             if app.leftPupil.area<=0 and app.rightPupil.area<=0: #if closed eyes
                 app.movingEyesFeature=not app.movingEyesFeature
                 app.movingEyesFeatureUpandDown=not app.movingEyesFeatureUpandDown
                 print("switched!")
+                app.eyesClosed=False
             else:
                 app.startDisengage=time.time()
                 app.eyesClosed=False
@@ -295,6 +296,7 @@ def checkLegality(app):
         app.currY=app.screeny-30
     elif app.currY-app.delta<0:
         app.currY=30
+
 #MOUSE MOVING END *************************************************************
 def redrawAll(app,canvas):
     instructions="""
@@ -313,18 +315,18 @@ def redrawAll(app,canvas):
     canvas.create_rectangle(0,0,app.width,app.height,fill="lightblue")
 
     if app.currentlyCalibrating:
-        canvas.create_text(app.width//2, 250, text="How to Calibrate!",font='Arial 15 bold')
+        canvas.create_text(app.width//2, 270, text="How to Calibrate!",font='Arial 15 bold')
 
-        start=255
+        start=275
         y=0
         for line in instructions.splitlines():
             canvas.create_text(app.width//2, start+y, text=line.strip())
             y += 20
-        functionstart=23
+        functionstart=24
         
     else:
         start=app.height//2
-        functionstart=12
+        functionstart=13
     start=40
     spacing=20
     canvas.create_text(app.width//2,start,text="Welcome to Mouseless!", font='Arial 26 bold')
@@ -334,10 +336,12 @@ def redrawAll(app,canvas):
     canvas.create_text(app.width//2,start+4*spacing,text="Step 2: Press '2' to be able to move left and right")
     canvas.create_text(app.width//2,start+5*spacing,text="Step 2: Press '3' to be able to move up and down")
     #current modes
-    canvas.create_rectangle(app.width//2-120,start+7*spacing-10,app.width//2+120, start+9*spacing+10)
+    canvas.create_rectangle(app.width//2-120,start+7*spacing-10,app.width//2+120, start+10*spacing+10)
     canvas.create_text(app.width//2,start+7*spacing,text=f"Calibration Mode: %s" %("On" if app.currentlyCalibrating else "Off"),font='Arial 12 bold',fill=f"%s" %("green" if app.currentlyCalibrating else "black"))
     canvas.create_text(app.width//2,start+8*spacing,text=f"Clicking and Scrolling Mode: %s" %("On" if app.clickscrollingFeature else "Off"),font='Arial 12 bold',fill=f"%s" %("green" if app.clickscrollingFeature else "black"))
-    canvas.create_text(app.width//2,start+9*spacing,text=f"Mouse Moving Mode: %s" %("On" if app.movingEyesFeature else "Off"),font='Arial 12 bold',fill=f"%s" %("green" if app.movingEyesFeature else "black"))
+    canvas.create_text(app.width//2,start+9*spacing,text=f"Mouse Moving Mode (Left and Right): %s" %("On" if app.movingEyesFeature else "Off"),font='Arial 12 bold',fill=f"%s" %("green" if app.movingEyesFeature else "black"))
+    canvas.create_text(app.width//2,start+10*spacing,text=f"Mouse Moving Mode (Up and Down): %s" %("On" if app.movingEyesFeatureUpandDown else "Off"),font='Arial 12 bold',fill=f"%s" %("green" if app.movingEyesFeatureUpandDown else "black"))
+
     canvas.create_text(app.width//2, start+functionstart*spacing, text="Functions",font='Arial 15 bold')
     functions="""closing left eye 2-4 sec is        left click
     closing right eye 2-4 sec is       right click
@@ -352,7 +356,7 @@ def redrawAll(app,canvas):
         y+=spacing
         i+=1
         # closing both eyes 2-4 seconds      toggles mouse moving modes
-    canvas.create_text(app.width//2+10, 630, text="closing both eyes 2-4 sec is      toggles mouse \n                                                     moving modes")
+    canvas.create_text(app.width//2+10, 650, text="closing both eyes 2-4 sec is      toggles mouse \n                                                     moving modes")
 #CLICK AND SCROLL START *************************************************************
 def clickandScroll(app):
     if app.clickscrollingFeature:
@@ -392,13 +396,11 @@ def clickandScroll(app):
                 pyautogui.scroll(+10)           
             else: 
                 app.startLeft=time.time()
-                app.currrightBlink=False
-            
+                app.currrightBlink=False         
 #CLICK AND SCROLL END *************************************************************
 
-
-def keyPressed(app,event):
 #KEY PRESSED START *************************************************************
+def keyPressed(app,event):
     if event.key=="2" and not app.movingEyesFeatureUpandDown: #left and right
         app.movingEyesFeature=not app.movingEyesFeature
         app.originalLeftEyecx=app.leftEye.cx

@@ -44,6 +44,7 @@ closing right eye 4-7 sec is down scroll
 closing both eye 7-10 sec is disengage
 
 4. bibliography:
+heavily inspiried by Jaime Romero's Winking Mouse project https://www.youtube.com/watch?v=roLX33rS0B0&feature=youtu.be 
 https://pysource.com/2018/12/29/real-time-shape-detection-opencv-with-python-3/ <-- referenced to figure out opencv and contours
 https://pyautogui.readthedocs.io/en/latest/ <-- referenced for pyautogui methods 
 https://www.pyimagesearch.com/2016/02/01/opencv-center-of-contour/ <-- helpful to get center of contour 
