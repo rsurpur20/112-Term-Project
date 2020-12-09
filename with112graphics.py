@@ -34,8 +34,9 @@ class Pupil(object):
 
     def loopContours(self):
         ratio=0.04
-        areaMin=200
-        pupilAreaMin=200 #was 400
+        areaMin=100
+         #was 200
+        areaMax=2000
         font= cv2.FONT_HERSHEY_COMPLEX_SMALL
         lastLeftPupilArea=0
         thickness=2
@@ -48,13 +49,13 @@ class Pupil(object):
             x=approx.ravel()[0]
             y=approx.ravel()[1]
             #only draw area if pixels is greater than this num. this gets rid of noise
-            if 2000>area> areaMin:
+            if areaMax>area> areaMin:
             # frame, contour, ?, color, thickness
                 if 3 <len(approx)<10:
                     self.area=area
                     # location, font, thickness?, color
                     cv2.drawContours(self.frame, [approx], 0 ,(0,0,255), thickness)
-
+                    # cv2.putText(self.frame, f"{area}",(x,y), font, 1, (0,0,255), thickness, cv2.LINE_AA)
                 # #finding the center:
                 M = cv2.moments(cnt)
                 if M['m00']!=0:
@@ -68,7 +69,9 @@ class Pupil(object):
 class Eye(Pupil):
     def loopContours(self):
         ratio=0.04
-        areaMin=200
+        #it was 200,2000
+        areaMin=100
+        areaMax=3000
         font= cv2.FONT_HERSHEY_COMPLEX_SMALL
         thickness=2
         i=0
@@ -82,10 +85,12 @@ class Eye(Pupil):
             x=approx.ravel()[0]
             y=approx.ravel()[1]
             #only draw area if pixels is greater than this num. this gets rid of noise
-            if 2000>area> areaMin:
+            if areaMax>area> areaMin:
                 self.area=area
             # frame, contour, ?, color, thickness
                 cv2.drawContours(self.frame, [approx], 0 ,(0,0,0), thickness)
+                # cv2.putText(self.frame, f"{area}",(x,y), font, 1, (0,0,255), thickness, cv2.LINE_AA)
+
                 #finding the center:
                 M = cv2.moments(cnt)
                 if M['m00']!=0:
@@ -151,15 +156,15 @@ def timerFired(app):
     app.LHPupil=cv2.getTrackbarPos("LH","Trackbars for Pupil")
     app.LSPupil=cv2.getTrackbarPos("LS","Trackbars for Pupil")
     app.LVPupil=cv2.getTrackbarPos("LV","Trackbars for Pupil")
-    # app.lowerPupil=np.array((app.LHPupil,app.LSPupil,app.LVPupil))
-    app.lowerPupil=np.array((0,0,58))
+    app.lowerPupil=np.array((app.LHPupil,app.LSPupil,app.LVPupil))
+    # app.lowerPupil=np.array((0,0,58))
 
     app.higherPupil=np.array([180,255,255])
     # [4,87,82]
     #[0,89,62]
     #[0,88,103]
-    # app.lowerEye=np.array((app.LHEye,app.LSEye,app.LVEye))
-    app.lowerEye=np.array((0,81,82))
+    app.lowerEye=np.array((app.LHEye,app.LSEye,app.LVEye))
+    # app.lowerEye=np.array((0,81,82))
     app.higherEye=np.array([180,255,255])
 
     leftFrame=frame[250:310,500:600]
@@ -274,6 +279,7 @@ def mouseMoving(app):
     #MOUSE MOVING START *************************************************************
     if app.movingEyesFeature:
         negibibledistance=0
+        # app.originalLeftEyecx-app.leftPupil.cx,
         if app.originalLeftEyecx-app.leftPupil.cx<negibibledistance and app.originalRightEyecx-app.rightPupil.cx<negibibledistance:
             print("looking left")
             if app.currX-app.delta<0:
@@ -285,10 +291,10 @@ def mouseMoving(app):
             if app.currX+app.delta>app.screenx:
                 app.currX=app.screenx-30
             else: app.currX+=app.delta
-        elif app.leftEye.cy-app.leftPupil.cy>negibibledistance and app.rightEye.cy-app.rightPupil.cy>negibibledistance:
+        elif app.leftEye.cy-app.leftPupil.cy>negibibledistance or app.rightEye.cy-app.rightPupil.cy>negibibledistance:
             print("looking up")
             app.currY-=app.delta
-        elif app.leftEye.cy-app.leftPupil.cy<negibibledistance and app.rightEye.cy-app.rightPupil.cy<negibibledistance:
+        elif app.leftEye.cy-app.leftPupil.cy<negibibledistance or app.rightEye.cy-app.rightPupil.cy<negibibledistance:
             print("looking down")
             app.currY+=app.delta
         pyautogui.moveTo(app.currX, app.currY) 
